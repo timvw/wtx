@@ -1,0 +1,138 @@
+# Continuous integration for wtx.
+#
+# JOB NAMES ARE A PUBLIC INTERFACE. GitHub matches required status checks by
+# name, so renaming a job here silently removes it from any branch-protection
+# rule in .github/settings.yml that requires it -- and a rule requiring a name
+# nothing reports blocks every pull request forever. Rename in both places, or
+# not at all.
+#
+# The checks this workflow reports, verbatim, for `required_status_checks.contexts`:
+#
+#   Lint
+#   Test (ubuntu-latest)
+#   Test (macos-latest)
+#   Test (windows-latest)
+#   Cross-compile
+#
+# Note that the test job is a matrix: each leg reports its own check, so branch
+# protection lists all three, not a single "Test".
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Read-only: nothing here writes to the repository. The release workflow is
+# where `contents: write` lives.
+permissions:
+  contents: read
+
+# Superseded runs on the same ref are pointless -- cancel them so a stale run
+# cannot report on a branch that has already moved.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # The toolchain version comes from go.mod, so the module stays the single
+      # source of truth and a Go directive bump cannot leave the workflows behind.
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      # Both targets come from the Makefile, so a contributor reproduces this
+      # locally with the same command CI runs. fmt-check reports the offending
+      # paths and fails; it never rewrites files.
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Run go vet
+        run: make vet
+
+      # Redundant with golangci-lint's govet by design: the spec requires both,
+      # and `go vet` is what a contributor has without installing anything.
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: latest
+
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Report every platform's result in one run rather than stopping at the
+      # first failure -- a platform-specific break is the thing this matrix
+      # exists to find.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build
+        run: go build ./...
+
+      - name: Run tests
+        if: matrix.os != 'windows-latest'
+        run: go test -race ./...
+
+      # No -race on Windows: the detector needs a cgo toolchain, and the point
+      # of this leg is proving the suite passes on a Windows host, not detecting
+      # races a third time.
+      - name: Run tests (Windows)
+        if: matrix.os == 'windows-latest'
+        run: go test ./...
+
+  cross-compile:
+    name: Cross-compile
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # Builds every platform .goreleaser.yml declares, rather than restating
+      # the list here: the set verified on a pull request is then by
+      # construction the set a release publishes. It also smoke-tests the
+      # release configuration itself, so a bad template surfaces on the PR that
+      # introduced it instead of at tag time.
+      - name: Cross-compile all release targets
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: latest
+          args: build --snapshot --clean
+
+      - name: List built binaries
+        run: find dist -type f -name 'wtx*' -exec ls -lh {} +

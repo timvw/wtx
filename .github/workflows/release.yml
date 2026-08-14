@@ -1,0 +1,56 @@
+# Release pipeline for wtx.
+#
+# Publishing is externally visible and effectively irreversible, so the trigger
+# is deliberately narrow: an exact vMAJOR.MINOR.PATCH tag and nothing else. A
+# glob would fire this on a stray or moved tag. Pre-release tags (v1.2.3-rc.1)
+# do not match and therefore publish nothing; widening the pattern is a one-line
+# change, and GoReleaser's `prerelease: auto` already knows what to do with one.
+#
+# Scope today is GitHub release archives only. Publishing to the Homebrew tap
+# (timvw/homebrew-tap), AUR and WinGet is a deliberate follow-up: each writes to
+# a repository other than this one, which the default GITHUB_TOKEN cannot reach.
+# That change mints a short-lived installation token from the timvw-ci-bot App
+# with actions/create-github-app-token, listing each destination repository --
+# timvw/wt's release workflow is the working reference for that shape, including
+# why AUR and WinGet run as separate best-effort steps.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+# Deliberately no concurrency cancellation: a half-cancelled publish is exactly
+# the partial state this pipeline must not produce.
+
+jobs:
+  goreleaser:
+    name: Release with GoReleaser
+    runs-on: ubuntu-latest
+
+    steps:
+      # Full history, not the default shallow clone: GoReleaser derives both the
+      # version and the changelog from tag history.
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
