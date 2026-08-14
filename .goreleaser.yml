@@ -1,0 +1,81 @@
+# GoReleaser configuration for wtx.
+# https://goreleaser.com
+#
+# This file is the single source of truth for the target platform matrix. CI's
+# Cross-compile job runs `goreleaser build --snapshot` rather than its own
+# GOOS/GOARCH loop, so the platforms verified on a pull request are by
+# construction the platforms a release publishes.
+#
+# Scope today is GitHub release archives only. Publishing to the Homebrew tap,
+# AUR and WinGet is a deliberate follow-up; see .github/workflows/release.yml.
+
+version: 2
+
+project_name: wtx
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: .
+    binary: wtx
+    flags:
+      - -trimpath
+    # The symbol is the unexported `version` var in cmd/version.go, which takes
+    # precedence over the binary's embedded build metadata. Keep this in sync
+    # with LDFLAGS in the Makefile.
+    ldflags:
+      - -s -w -X github.com/timvw/wtx/cmd.version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      # Windows on ARM is excluded for the same reason wt excludes it: limited
+      # adoption, and no runner available to test it on. Add it when that
+      # changes -- nothing else here assumes its absence.
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    # LICENSE* and README* are GoReleaser's default file globs; they are listed
+    # explicitly because the release spec requires both inside every archive,
+    # and a default that changes upstream should not silently drop them.
+    files:
+      - src: LICENSE*
+      - src: README*
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: timvw
+    name: wtx
+  draft: false
+  prerelease: auto
+  name_template: "{{.Tag}}"
+  # Makes re-running a release for the same tag converge instead of failing on
+  # a 422 for an asset the previous attempt already uploaded.
+  replace_existing_artifacts: true

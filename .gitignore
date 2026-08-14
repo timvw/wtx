@@ -1,2 +1,5 @@
 # Binary produced by `make build`.
 /wtx
+
+# Build output from GoReleaser (`goreleaser build|release --snapshot`).
+/dist/

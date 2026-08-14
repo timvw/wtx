@@ -1,0 +1,39 @@
+# golangci-lint configuration for wtx.
+#
+# The enabled set is an explicit allowlist (`default: none`) rather than
+# golangci-lint's own defaults: the checks then survive a linter upgrade
+# unchanged, instead of a newly-default check turning an unrelated version bump
+# into a red pull request.
+#
+# CI runs this same file, so `make lint` locally and the Lint job in CI enable
+# exactly the same analysis.
+
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - ineffassign
+  settings:
+    errcheck:
+      check-blank: false
+      check-type-assertions: false
+  exclusions:
+    rules:
+      # Tests routinely ignore errors from setup helpers where a failure would
+      # surface as a test failure anyway; requiring a check there adds noise
+      # without adding safety.
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt
