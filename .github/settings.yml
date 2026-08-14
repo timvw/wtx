@@ -34,21 +34,57 @@ repository:
   has_wiki: false
   has_downloads: false
 
-# Branch protection and required status checks are deliberately NOT declared
-# yet: there are no CI workflows in this repository, so there are no checks that
-# could be required. A follow-up change adds them here, after the first workflow
-# is green -- otherwise the pull request that introduces the protection cannot
-# satisfy it itself.
+# Branch protection for the default branch.
 #
-# Topics are deferred to that same follow-up change.
+# ALL FOUR of `required_status_checks`, `enforce_admins`,
+# `required_pull_request_reviews` and `restrictions` must be present. The App
+# forwards this mapping to PUT /repos/{owner}/{repo}/branches/{branch}/protection,
+# where all four are required-but-nullable; omit any one of them and NONE of the
+# settings are applied -- silently, in the App's delivery log rather than as a
+# failed check. The `null`s below are load-bearing, not leftovers.
 #
-# branches:
-#   - name: main
-#     protection:
-#       required_pull_request_reviews:
-#         required_approving_review_count: 1
-#       required_status_checks:
-#         strict: true
-#         contexts: []          # <- name the required check jobs here
-#       enforce_admins: false
-#       restrictions: null
+# The `contexts` list is one half of an interface. The other half is the job
+# names in .github/workflows/ci.yml, which carries the same warning: GitHub
+# matches required checks by name, so renaming a job there without renaming it
+# here leaves a required check that nothing ever reports, and a check that never
+# reports blocks every pull request forever. Rename in both files, or not at all.
+#
+# Topics are still deferred -- they were parked alongside branch protection but
+# are unrelated to it, and adding them is not this change's job.
+
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        # false: a branch does not have to be rebased onto the tip of main
+        # before merging. `true` would re-run all five checks on every merge
+        # that follows another merge, which for a single-contributor repository
+        # buys a rare protection at a constant cost. Push-triggered CI on main
+        # catches the combination break instead, and the fix is forward.
+        strict: false
+        # Verbatim from ci.yml, and confirmed against the names a real run
+        # reports. The test job is a matrix, so each OS leg reports its own
+        # check -- there is no combined "Test" context to require.
+        contexts:
+          - Lint
+          - Test (ubuntu-latest)
+          - Test (macos-latest)
+          - Test (windows-latest)
+          - Cross-compile
+      # null: no approving review is required. Tim is the sole maintainer and
+      # GitHub does not let an author approve their own pull request, so
+      # requiring one review would make every pull request unmergeable except by
+      # admin override -- turning the escape hatch into the normal merge path.
+      # This becomes a real requirement when a second maintainer appears.
+      required_pull_request_reviews: null
+      # false: protection is not enforced against administrators. This is a
+      # deliberate escape hatch. The likeliest failure here is a required check
+      # name that no job reports, whose symptom is that every pull request --
+      # including the one that fixes the name -- becomes unmergeable. With
+      # `true`, recovery means dismantling the rule in the UI and letting the
+      # App fight it back; with `false`, it is one merge past a visible warning.
+      enforce_admins: false
+      # null: no push allowlist. Push restrictions are organisation-only and are
+      # rejected on a user-owned repository; the protection above already stops
+      # direct pushes to main, so there is no allowlist to maintain.
+      restrictions: null
