@@ -1,0 +1,54 @@
+# Repository configuration for timvw/wtx.
+#
+# This repository is managed by the "Settings" GitHub App (repository-settings).
+# https://github.com/apps/settings
+#
+# The App applies this file automatically on every push to the default branch.
+# It is the source of truth for every setting declared below: changes made by
+# hand in the GitHub web UI WILL BE REVERTED on the next reconciliation. To
+# change a setting, change it here and open a pull request.
+#
+# Settings not declared in this file are left untouched by the App.
+#
+# Automation credentials: the `timvw-ci-bot` GitHub App is installed on this
+# repository. Automated workflows that need to open or update pull requests, or
+# publish check results, mint a short-lived installation token from that App
+# (App ID + private key -> installation token, e.g. via
+# actions/create-github-app-token). Do not add a long-lived personal access
+# token as a repository secret.
+
+repository:
+  name: wtx
+  description: wtx
+  private: false
+
+  # Merge behaviour: squash only, so main stays linear and one PR is one commit.
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: false
+  delete_branch_on_merge: true
+
+  # Optional features, declared explicitly rather than left at GitHub defaults.
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_downloads: false
+
+# Branch protection and required status checks are deliberately NOT declared
+# yet: there are no CI workflows in this repository, so there are no checks that
+# could be required. A follow-up change adds them here, after the first workflow
+# is green -- otherwise the pull request that introduces the protection cannot
+# satisfy it itself.
+#
+# Topics are deferred to that same follow-up change.
+#
+# branches:
+#   - name: main
+#     protection:
+#       required_pull_request_reviews:
+#         required_approving_review_count: 1
+#       required_status_checks:
+#         strict: true
+#         contexts: []          # <- name the required check jobs here
+#       enforce_admins: false
+#       restrictions: null
