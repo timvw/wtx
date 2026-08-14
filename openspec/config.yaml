@@ -1,5 +1,56 @@
 schema: spec-driven
 
+# Per-artifact rules. Delivered to the planning workflow through
+# `openspec instructions <artifact> --json`, so a rule here reaches the step that
+# would otherwise get it wrong, at the moment it would get it wrong -- rather
+# than sitting in a document an author has to remember to read.
+#
+# Entries use folded block scalars (>-) deliberately. A `: ` inside a plain
+# multi-line scalar makes this file invalid YAML, and OpenSpec responds by
+# warning and delivering NO rules at all -- the file looks fine and silently
+# does nothing.
+rules:
+  tasks:
+    - >-
+      A task is work that changes the repository and can be completed, and
+      ticked, before this change's pull request is merged. Do not write a task
+      that can only be carried out after the merge.
+    - >-
+      Behaviour that can only be observed after the change lands belongs in the
+      delta spec as a requirement scenario, not in the task list. The scenario
+      is durable and testable; a ticked checkbox is a one-time assertion in a
+      file that is read once and then archived.
+    - >-
+      An action a maintainer will take later at a time of their choosing --
+      publishing a release, enabling something downstream -- belongs in
+      design.md's migration plan, or in a follow-up change. It is not a task of
+      the change that enables it.
+    - >-
+      A post-merge task also prevents the change from being archived in the pull
+      request that completes it, because the change can never reach completion
+      before that pull request merges.
+
+# Per-operation guidance for how apply and archive work is conducted. Delivered
+# to those workflows as `operationGuidance`.
+operations:
+  apply:
+    guidance:
+      - >-
+        When the last task of a change is complete, archive the change on the
+        same branch, in the same pull request, with
+        `openspec archive <name> --yes`. Implementation, spec sync and archival
+        land together or not at all, so the specs on the default branch always
+        describe what the default branch contains.
+      - >-
+        Keep the archive as the final commit on the branch. If review then calls
+        for a spec change, drop that commit, make the change, and re-archive --
+        otherwise the edit has to be made both in the archived delta and in the
+        already-updated main spec.
+      - >-
+        Do not open a separate pull request to archive after the implementation
+        has merged. That is what leaves the default branch carrying an
+        implementation whose specs have not been updated to describe it.
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
@@ -8,25 +59,3 @@ schema: spec-driven
 #     Tech stack: TypeScript, React, Node.js
 #     We use conventional commits
 #     Domain: e-commerce platform
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
