@@ -85,7 +85,9 @@ Automation that must act on the repository beyond the permissions of the default
 
 The configuration SHALL declare branch protection for the default branch in `.github/settings.yml`, so that protection is reviewable in a pull request and is restored automatically if it is altered through the GitHub web UI.
 
-While protection is in force, a commit SHALL reach the default branch only by merging a pull request. A direct push to the default branch SHALL be refused.
+While protection is in force, a commit SHALL reach the default branch only by merging a pull request, for every actor the protection is enforced against. A direct push to the default branch SHALL be refused.
+
+Repository administrators are exempt, because the protection is deliberately declared not to bind them (see "Protection requires no approving review and does not bind administrators"). A direct push by an administrator is therefore still accepted. That exemption is the documented escape hatch, not a hole in this requirement, and it is the reason this requirement is stated in terms of enforced actors rather than absolutely.
 
 #### Scenario: Protection is declared in the configuration file
 
@@ -101,9 +103,15 @@ While protection is in force, a commit SHALL reach the default branch only by me
 
 #### Scenario: Direct push to the default branch is refused
 
-- **WHEN** a contributor pushes a commit directly to `main`
+- **WHEN** a contributor who is not a repository administrator pushes a commit directly to `main`
 - **THEN** the push is rejected
 - **AND** the change can only land by opening a pull request
+
+#### Scenario: An administrator's direct push is still accepted
+
+- **WHEN** a repository administrator pushes a commit directly to `main`
+- **THEN** the push is accepted, because the protection is not enforced against administrators
+- **AND** this is the same escape hatch that lets an administrator merge past a stuck check
 
 ### Requirement: Merging into the default branch requires every CI check to pass
 
