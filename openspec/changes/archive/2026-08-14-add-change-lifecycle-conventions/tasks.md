@@ -14,4 +14,4 @@
 - [x] 3.2 Confirm the task rule is actually delivered: `openspec instructions tasks --change add-change-lifecycle-conventions --json` returns the entries under `rules`.
 - [x] 3.3 Confirm the apply guidance is actually delivered: `openspec instructions apply --change add-change-lifecycle-conventions --json` returns it under `operationGuidance`.
 - [x] 3.4 Confirm `openspec validate add-change-lifecycle-conventions --strict` passes.
-- [ ] 3.5 Archive this change on this branch with `openspec archive add-change-lifecycle-conventions --yes`, as its own final commit, and confirm `openspec validate --specs --strict` passes afterwards with `spec-lifecycle` present among the main specs.
+- [x] 3.5 Archive this change on this branch with `openspec archive add-change-lifecycle-conventions --yes`, as its own final commit, and confirm `openspec validate --specs --strict` passes afterwards with `spec-lifecycle` present among the main specs.
