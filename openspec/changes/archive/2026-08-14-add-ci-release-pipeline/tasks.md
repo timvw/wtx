@@ -42,4 +42,4 @@
 - [x] 6.2 Confirm the platform sets agree: the pairs built by `goreleaser build --snapshot` are exactly the five in `.goreleaser.yml`, and CI compiles that same set because it reads the same file — no second list exists anywhere.
 - [x] 6.3 Deliberately break formatting in a scratch file, confirm `make fmt-check` fails and names the file, then revert. Do the same for a `go vet` finding if cheap.
 - [x] 6.4 Open the pull request and confirm all five checks run and pass on it. Do not push a version tag as part of this change — cutting the first release is a separate, maintainer-timed decision.
-- [ ] 6.5 After the pull request merges, confirm CI is green on `main`. This is the precondition the deferred branch-protection change waits on.
+- [x] 6.5 After the pull request merges, confirm CI is green on `main`. This is the precondition the deferred branch-protection change waits on.
