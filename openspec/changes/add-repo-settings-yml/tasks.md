@@ -11,16 +11,16 @@
 
 - [x] 2.1 Confirm the file parses as valid YAML and has a top-level `repository:` mapping
 - [x] 2.2 Re-read the file against `specs/repo-settings/spec.md` and confirm every ADDED requirement is covered, and that no active `branches:` rules are present
-- [ ] 2.3 Record the current live description verbatim in the PR body so it can be restored by hand if the rename is reverted
-- [ ] 2.4 Open a PR with the change; do not push directly to `main`
+- [x] 2.3 Record the current live description verbatim in the PR body so it can be restored by hand if the rename is reverted
+- [x] 2.4 Open a PR with the change; do not push directly to `main`
 
 ## 3. Apply and verify
 
-- [ ] 3.1 Merge the PR to `main` and let the Settings App reconcile (no manual trigger needed)
-- [ ] 3.2 Verify applied state: `gh repo view timvw/wtx --json description,visibility,deleteBranchOnMerge,mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed,hasIssuesEnabled,hasProjectsEnabled,hasWikiEnabled`
-- [ ] 3.3 Confirm `description` is exactly `wtx` and `visibility` is `PUBLIC`
-- [ ] 3.4 Confirm `main` still has no branch protection: `gh api /repos/timvw/wtx/branches/main/protection` returns 404
-- [ ] 3.5 If any declared value did not apply, inspect the Settings App delivery log (repo Settings → GitHub Apps → Settings) before changing anything through the UI
+- [x] 3.1 Merge the PR to `main` and let the Settings App reconcile (no manual trigger needed)
+- [x] 3.2 Verify applied state: `gh repo view timvw/wtx --json description,visibility,deleteBranchOnMerge,mergeCommitAllowed,squashMergeAllowed,rebaseMergeAllowed,hasIssuesEnabled,hasProjectsEnabled,hasWikiEnabled`
+- [x] 3.3 Confirm `description` is exactly `wtx` and `visibility` is `PUBLIC`
+- [x] 3.4 Confirm `main` still has no branch protection: `gh api /repos/timvw/wtx/branches/main/protection` returns 404
+- [x] 3.5 If any declared value did not apply, inspect the Settings App delivery log (repo Settings → GitHub Apps → Settings) before changing anything through the UI — not triggered; every declared value applied on the first reconciliation
 
 ## 4. Hand off to the follow-up
 
