@@ -42,6 +42,11 @@ operations:
         land together or not at all, so the specs on the default branch always
         describe what the default branch contains.
       - >-
+        Before archiving, confirm that every checkbox in tasks.md is ticked.
+        `--yes` is required for a non-interactive run but also suppresses
+        OpenSpec's task-completeness prompt, so it can otherwise archive an
+        incomplete change with only a warning.
+      - >-
         Keep the archive as the final commit on the branch. If review then calls
         for a spec change, drop that commit, make the change, and re-archive --
         otherwise the edit has to be made both in the archived delta and in the

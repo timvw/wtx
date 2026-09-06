@@ -64,7 +64,7 @@ This convention SHALL be declared in the project's OpenSpec configuration so tha
 
 ### Requirement: The specifications on the default branch describe what the default branch contains
 
-At every commit on the default branch, the main specifications SHALL describe the state of the repository at that commit: every merged change's requirements SHALL be present in the main specs, and no unmerged change's requirements SHALL be.
+At every commit added to the default branch after this convention lands, the main specifications SHALL describe the state of the repository at that commit: every merged change's requirements SHALL be present in the main specs, and no unmerged change's requirements SHALL be. Commits that predate the convention are outside this guarantee.
 
 There SHALL NOT be an interval during which the default branch carries an implementation whose delta specs have not yet been merged into the main specs.
 
@@ -75,19 +75,20 @@ There SHALL NOT be an interval during which the default branch carries an implem
 
 #### Scenario: No change is left half-applied
 
-- **WHEN** any commit on the default branch is inspected
+- **WHEN** any commit added to the default branch after this convention lands is inspected
 - **THEN** no change directory outside the archive has all of its tasks complete
 
-### Requirement: The archive is the tooling's deterministic output
+### Requirement: The archive is produced by the tooling
 
-Archiving SHALL be performed by the OpenSpec tooling's own non-interactive archive operation, rather than by reproducing its behaviour by hand or by a model. A maintainer SHALL be able to regenerate an archive locally with a single command and obtain the same result.
+Archiving SHALL be performed by the OpenSpec tooling's own non-interactive archive operation, rather than by reproducing its behaviour by hand or by a model. A maintainer SHALL be able to replay an archive locally with a single command and confirm the same merged specification semantics and archived artifact contents. Tool-version formatting differences and the archive directory's run-date prefix are not part of that guarantee.
 
 Archiving SHALL be refused when the tooling reports that it cannot apply a delta safely, and the change SHALL NOT be archived until the reported problem is resolved.
 
-#### Scenario: An archive is reproducible
+#### Scenario: An archive is semantically reproducible
 
 - **WHEN** a maintainer runs the archive command locally for a change
-- **THEN** it produces the same result that is committed on the branch
+- **THEN** the merged specification semantics and archived artifact contents match what is committed on the branch
+- **AND** formatting may vary by compatible OpenSpec version and the archive directory prefix reflects the local date of the run
 
 #### Scenario: An unsafe delta is not archived
 
