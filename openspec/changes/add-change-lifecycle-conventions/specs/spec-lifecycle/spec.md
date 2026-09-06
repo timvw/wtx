@@ -66,11 +66,11 @@ This convention SHALL be declared in the project's OpenSpec configuration so tha
 
 At every commit added to the default branch after this convention lands, the main specifications SHALL describe the state of the repository at that commit: every merged change's requirements SHALL be present in the main specs, and no unmerged change's requirements SHALL be. Commits that predate the convention are outside this guarantee.
 
-There SHALL NOT be an interval during which the default branch carries an implementation whose delta specs have not yet been merged into the main specs.
+After this convention lands, there SHALL NOT be an interval during which the default branch carries an implementation whose delta specs have not yet been merged into the main specs.
 
 #### Scenario: A merged change's requirements are in the main specs
 
-- **WHEN** a change's implementation is present on the default branch
+- **WHEN** a change's implementation is added to the default branch after this convention lands
 - **THEN** that change's requirements are present in the main specs at the same commit
 
 #### Scenario: No change is left half-applied
